@@ -14,17 +14,6 @@ import os
 
 
 def generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder):
-    
-
-    # Loading the pretrained model
-    # print("[1] Loading pretrained Models")
-    # encoder_weights = Path("encoder/saved_models/pretrained.pt")
-    # vocoder_weights = Path("vocoder/saved_models/pretrained/pretrained.pt")
-    # syn_dir = Path("synthesizer/saved_models/pretrained/pretrained.pt")
-    # encoder.load_model(encoder_weights)
-    # synthesizer = Synthesizer(syn_dir)
-    # vocoder.load_model(vocoder_weights)
-
 
     print("[1] Fetching Reference Audio")
     # Fetching the reference audio
@@ -43,11 +32,7 @@ def generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder):
     generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
 
 
-    print("[3] Saving the Audio")
-    # Making the static directory
-    if not os.path.isdir("static"):
-        os.mkdir("static") 
-    
+    print("[3] Saving the Audio")    
     # Saving the Generated Audio file
     audio_file_path = os.path.join("static", "audio" + audioId + ".wav")
     sf.write(audio_file_path, generated_wav, synthesizer.sample_rate)

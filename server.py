@@ -23,8 +23,10 @@ syn_dir = Path("synthesizer/saved_models/pretrained/pretrained.pt")
 encoder.load_model(encoder_weights)
 synthesizer = Synthesizer(syn_dir)
 vocoder.load_model(vocoder_weights)
-print("[*] Loading pretrained Models complete")
 
+print("[*] Making the Static Folder if not present already")
+if not os.path.isdir("static"):
+    os.mkdir("static")
 
 
 @app.route("/api/generate-audio", methods=["POST"])
@@ -72,7 +74,7 @@ def create_audio():
 
     except Exception as e:
 
-        print("Internal Server Error --------------------------------")
+        print("Internal Server Error")
         print("[ERROR] ", e)
         return_val = {
             'status': 500,
@@ -82,10 +84,11 @@ def create_audio():
     return jsonify(return_val)
 
 
-app.run(debug=True)
-
-
 @app.route("/static/<path:filename>", methods=["GET"])
 @cross_origin()
 def fetch_audio(filename):
     return send_from_directory("static", filename)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
