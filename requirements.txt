@@ -1,3 +1,5 @@
+Flask==1.1.2
+Flask-Cors==3.0.10
 umap-learn
 visdom
 librosa>=0.8.0
