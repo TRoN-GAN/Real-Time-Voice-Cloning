@@ -72,8 +72,14 @@ def create_audio():
     try:
 
         # Generate Audio Code goes here
-        reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
-        print(f"[REFERENCE AUDIO] {reference_audio_path}")
+        # reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
+        # print(f"[REFERENCE AUDIO] {reference_audio_path}")
+
+        ref_male_audio_path = os.path.join("data", "ref_audios", "2002-139469-0019.flac")
+        ref_female_audio_path = os.path.join("data", "ref_audios", "2007-149877-0001.flac")
+        reference_audio_path = ref_male_audio_path if (int(sex)) else ref_female_audio_path
+
+        print("[*] Taking Ref Audio ", reference_audio_path)
         generated_audio_path = generate_audio(
             audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
 
