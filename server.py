@@ -8,6 +8,7 @@ from synthesizer.inference import Synthesizer
 
 
 from generate_audio import generate_audio
+from cremadUtils import generate_CREMAD_search_dict
 
 app = Flask(__name__, static_folder='static')
 cors = CORS(app)
@@ -28,6 +29,15 @@ print("[*] Making the Static Folder if not present already")
 if not os.path.isdir("static"):
     os.mkdir("static")
 
+print("[*] Loading reference audios from CREMAD")
+meta_data_file_path = os.path.join("data", "CREMAD", "VideoDemographics.csv")
+audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
+
+# Getting the search dict ready
+print("[*] Generating Search Dictionary for CREMAD")
+CREMAD_search_dict = generate_CREMAD_search_dict(
+    meta_data_file_path, audio_dir_path)
+
 
 @app.route("/api/generate-audio", methods=["POST"])
 @cross_origin()
@@ -35,11 +45,11 @@ def create_audio():
 
     # Retrieving the data from json
     request_content = request.get_json()
-    
+
     audioId = request_content['audioId']
     text_prompt = request_content['prompt']
     sex = request_content['sex']
-    # age = int(request_content['age'])
+    ageGroup = request_content['age']
     # ethnicity = request_content['ethnicity']
     # race = request_content['race']
     # language = request_content['language']
@@ -50,7 +60,7 @@ def create_audio():
     print("Audio ID : ", audioId)
     print("Prompt : ", text_prompt)
     print("Sex : ", sex)
-    # print("Age : ", age)
+    print("Age Group : ", ageGroup)
     # print("Ethnicity : ", ethnicity)
     # print("race : ", race)
     # print("language : ", language)
@@ -62,7 +72,10 @@ def create_audio():
     try:
 
         # Generate Audio Code goes here
-        generated_audio_path = generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder)
+        reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
+        print(f"[REFERENCE AUDIO] {reference_audio_path}")
+        generated_audio_path = generate_audio(
+            audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
 
         # Returning the generated file
         return_val = {
