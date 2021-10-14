@@ -213,6 +213,7 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
             f"[ERROR] Invalid value for the argument 'group_by' : {group_by}")
 
 
+
 if __name__ == "__main__":
     meta_data_file_path = os.path.join(
         "data", "CREMAD", "VideoDemographics.csv")
@@ -232,7 +233,7 @@ if __name__ == "__main__":
     This must be passed to group audios by gender
 
     group_by = "both"
-    This must be passed to group audios by gender and age group
+    This must be passed to group audios by age group and gender
     '''
     organize_cremad(meta_data_file_path, source_dir,
                     target_dir, group_by="both")
