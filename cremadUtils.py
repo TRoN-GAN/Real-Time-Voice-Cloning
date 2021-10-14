@@ -1,6 +1,7 @@
 import pandas as pd
 import copy
 import os
+import shutil
 import glob
 
 search_dict_structure = {
@@ -97,10 +98,141 @@ def generate_CREMAD_search_dict(meta_data_file_path, audio_dir_path):
     return search_dict
 
 
+age_directories = ["20-25", "25-30", "30-35", "35-40",
+                   "40-45", "45-50", "50-55", "55-60", "60-75"]
+
+gender_directories = ["Male", "Female"]
+
+
+def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age group"):
+
+    # Get a list of all the files in the source directory
+    audio_files = os.listdir(source_dir)
+    num_audio_files = len(audio_files)
+
+    # Making the target directory
+    if os.path.isdir(target_dir):
+        shutil.rmtree(target_dir)
+    os.mkdir(target_dir)
+
+    # Loading the Metadata file and making a search dict
+    demographics = pd.read_csv(meta_data_file_path)
+
+    person_info = {}
+    for index, row in demographics.iterrows():
+        print(row)
+        person_info[str(row["ActorID"])] = {
+            "Age": row["Age"], "Sex": row["Sex"]}
+
+    # Creating the group directories
+    print(f"[INFO] Grouping by {group_by}")
+    if group_by == "age group":
+
+        # Making the group directories
+        for group in age_directories:
+            os.mkdir(os.path.join(target_dir, group))
+
+        # Loop to copy files from source_dir to target_dir
+        for audio_file in audio_files:
+
+            # Obtaining person ID
+            person_ID = str(audio_file.split("_")[0])
+
+            # Obtaining the Age Group
+            age_group = get_age_group(person_info[person_ID]["Age"])
+
+            # Getting Source and destination paths
+            source_audio_path = os.path.join(source_dir, audio_file)
+            destination_audio_path = os.path.join(
+                target_dir, age_group, audio_file)
+
+            # Copying the file
+            shutil.copyfile(source_audio_path, destination_audio_path)
+            print(f"Person {person_ID}, Age Group : {age_group}")
+            print(f"Copying the file to {destination_audio_path}")
+            print()
+
+    elif group_by == "gender":
+
+        # Making the group directories
+        for group in gender_directories:
+            os.mkdir(os.path.join(target_dir, group))
+
+        # Loop to copy files from source_dir to target_dir
+        for audio_file in audio_files:
+
+            # Obtaining person ID
+            person_ID = str(audio_file.split("_")[0])
+
+            # Obtaining the Age Group
+            gender = row["Sex"]
+
+            # Getting Source and destination paths
+            source_audio_path = os.path.join(source_dir, audio_file)
+            destination_audio_path = os.path.join(
+                target_dir, gender, audio_file)
+
+            # Copying the file
+            shutil.copyfile(source_audio_path, destination_audio_path)
+            print(f"Person {person_ID}, Gender : {gender}")
+            print(f"Copying the file to {destination_audio_path}")
+            print()
+
+    elif group_by == "both":
+
+        # Making the group directories and nested gender directories
+        for cur_age_group in age_directories:
+            os.mkdir(os.path.join(target_dir, cur_age_group))
+            for gender_group in gender_directories:
+                os.mkdir(os.path.join(target_dir, cur_age_group, gender_group))
+
+        # Loop to copy files from source_dir to target_dir
+        for audio_file in audio_files:
+
+            # Obtaining person ID
+            person_ID = str(audio_file.split("_")[0])
+
+            # Obtaining the Age Group
+            age_group = get_age_group(person_info[person_ID]["Age"])
+            gender = row["Sex"]
+
+            # Getting Source and destination paths
+            source_audio_path = os.path.join(source_dir, audio_file)
+            destination_audio_path = os.path.join(
+                target_dir, age_group, gender, audio_file)
+
+            # Copying the file
+            shutil.copyfile(source_audio_path, destination_audio_path)
+            print(
+                f"Person {person_ID}, Age Group {age_group}, Gender : {gender}")
+            print(f"Copying the file to {destination_audio_path}")
+            print()
+
+    else:
+        print(
+            f"[ERROR] Invalid value for the argument 'group_by' : {group_by}")
+
+
 if __name__ == "__main__":
     meta_data_file_path = os.path.join(
         "data", "CREMAD", "VideoDemographics.csv")
-    audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
-    search_dict = generate_CREMAD_search_dict(
-        meta_data_file_path, audio_dir_path)
-    print(search_dict)
+    # audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
+    # search_dict = generate_CREMAD_search_dict(
+    #     meta_data_file_path, audio_dir_path)
+    # print(search_dict)
+
+    source_dir = os.path.join("data", "CREMAD", "AudioWAV")
+    target_dir = os.path.join("data", "grouped_cremad")
+
+    '''
+    group_by = "age group"
+    This must be passed to group audios by age group
+
+    group_by = "gender
+    This must be passed to group audios by gender
+
+    group_by = "both"
+    This must be passed to group audios by gender and age group
+    '''
+    organize_cremad(meta_data_file_path, source_dir,
+                    target_dir, group_by="both")
