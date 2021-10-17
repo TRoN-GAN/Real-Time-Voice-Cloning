@@ -165,7 +165,7 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
             person_ID = str(audio_file.split("_")[0])
 
             # Obtaining the Age Group
-            gender = row["Sex"]
+            gender = person_info[person_ID]["Sex"]
 
             # Getting Source and destination paths
             source_audio_path = os.path.join(source_dir, audio_file)
@@ -194,7 +194,7 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
 
             # Obtaining the Age Group
             age_group = get_age_group(person_info[person_ID]["Age"])
-            gender = row["Sex"]
+            gender = person_info[person_ID]["Sex"]
 
             # Getting Source and destination paths
             source_audio_path = os.path.join(source_dir, audio_file)
@@ -215,14 +215,13 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
 
 
 if __name__ == "__main__":
-    meta_data_file_path = os.path.join(
-        "data", "CREMAD", "VideoDemographics.csv")
+    meta_data_file_path = os.path.join("..", "DATASETS", "CREMAD", "VideoDemographics.csv")
     # audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
     # search_dict = generate_CREMAD_search_dict(
     #     meta_data_file_path, audio_dir_path)
     # print(search_dict)
 
-    source_dir = os.path.join("data", "CREMAD", "AudioWAV")
+    source_dir = os.path.join("..", "DATASETS", "CREMAD", "AudioWAV")
     target_dir = os.path.join("data", "grouped_cremad")
 
     '''
