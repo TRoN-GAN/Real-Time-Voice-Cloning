@@ -215,13 +215,11 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
 
 
 if __name__ == "__main__":
-    meta_data_file_path = os.path.join("..", "DATASETS", "CREMAD", "VideoDemographics.csv")
-    # audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
-    # search_dict = generate_CREMAD_search_dict(
-    #     meta_data_file_path, audio_dir_path)
-    # print(search_dict)
+    # put the correct path to the directory containing CREMAD dataset
+    cremad_dir = os.path.join("..", "DATASETS", "CREMAD")
 
-    source_dir = os.path.join("..", "DATASETS", "CREMAD", "AudioWAV")
+    meta_data_file_path = os.path.join(cremad_dir, "VideoDemographics.csv")
+    source_dir = os.path.join(cremad_dir, "AudioWAV")
     target_dir = os.path.join("data", "grouped_cremad")
 
     '''
