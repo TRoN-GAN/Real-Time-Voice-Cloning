@@ -3,6 +3,7 @@ import copy
 import os
 import shutil
 import glob
+import sys
 
 search_dict_structure = {
     "20-25": {
@@ -104,7 +105,7 @@ age_directories = ["20-25", "25-30", "30-35", "35-40",
 gender_directories = ["Male", "Female"]
 
 
-def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age group"):
+def organize_cremad(meta_data_file_path, source_dir,  target_dir, emotion = "", group_by="age group"):
 
     # Get a list of all the files in the source directory
     audio_files = os.listdir(source_dir)
@@ -135,6 +136,10 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
         # Loop to copy files from source_dir to target_dir
         for audio_file in audio_files:
 
+            emot_audio = str(audio_file.split("_")[2])
+            if(emotion != "" and emot_audio != emotion):
+                continue
+
             # Obtaining person ID
             person_ID = str(audio_file.split("_")[0])
 
@@ -160,6 +165,10 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
 
         # Loop to copy files from source_dir to target_dir
         for audio_file in audio_files:
+
+            emot_audio = str(audio_file.split("_")[2])
+            if(emotion != "" and emot_audio != emotion):
+                continue
 
             # Obtaining person ID
             person_ID = str(audio_file.split("_")[0])
@@ -189,6 +198,10 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
         # Loop to copy files from source_dir to target_dir
         for audio_file in audio_files:
 
+            emot_audio = str(audio_file.split("_")[2])
+            if(emotion != "" and emot_audio != emotion):
+                continue
+
             # Obtaining person ID
             person_ID = str(audio_file.split("_")[0])
 
@@ -216,11 +229,22 @@ def organize_cremad(meta_data_file_path, source_dir,  target_dir, group_by="age 
 
 if __name__ == "__main__":
     # put the correct path to the directory containing CREMAD dataset
-    cremad_dir = os.path.join("..", "DATASETS", "CREMAD")
+    cremad_dir = os.path.join("..", "DATASETS", "CREMAD_small")
 
     meta_data_file_path = os.path.join(cremad_dir, "VideoDemographics.csv")
     source_dir = os.path.join(cremad_dir, "AudioWAV")
     target_dir = os.path.join("data", "grouped_cremad")
+
+    # getting emotion for command line
+    n = len(sys.argv)
+    emotion = ""
+    if(n == 2):
+        emotion = sys.argv[1]
+
+    # checking validity of emotion
+    if emotion not in ["", "ANG", "DIS", "FEA", "HAP", "NEU", "SAD"]:
+        print("Invalid emotion")
+        exit(1)
 
     '''
     group_by = "age group"
@@ -233,4 +257,4 @@ if __name__ == "__main__":
     This must be passed to group audios by age group and gender
     '''
     organize_cremad(meta_data_file_path, source_dir,
-                    target_dir, group_by="both")
+                    target_dir, emotion, group_by="both")
