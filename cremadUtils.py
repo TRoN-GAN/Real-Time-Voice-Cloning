@@ -233,7 +233,19 @@ if __name__ == "__main__":
 
     meta_data_file_path = os.path.join(cremad_dir, "VideoDemographics.csv")
     source_dir = os.path.join(cremad_dir, "AudioWAV")
-    target_dir = os.path.join("data", "grouped_cremad")
+    target_cremad_dir = os.path.join("data", "grouped_cremad")
+    
+    # Making target_cremad_dir directory
+    if os.path.isdir(target_cremad_dir):
+        shutil.rmtree(target_cremad_dir)
+    os.mkdir(target_cremad_dir)
+
+    target_dir = os.path.join(target_cremad_dir, "AudioWAV")
+
+    # Making the target directory
+    if os.path.isdir(target_dir):
+        shutil.rmtree(target_dir)
+    os.mkdir(target_dir)
 
     # getting emotion for command line
     n = len(sys.argv)
