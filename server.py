@@ -1,4 +1,5 @@
 import os
+import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
 from pathlib import Path
@@ -18,9 +19,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # Loading the Models and keeping them ready for use
 # Loading the pretrained model
 print("[*] Loading pretrained Models")
-encoder_weights = Path("encoder/saved_models/pretrained.pt")
-vocoder_weights = Path("vocoder/saved_models/pretrained/pretrained.pt")
-syn_dir = Path("synthesizer/saved_models/pretrained/pretrained.pt")
+
+saved_model = "1"
+encoder_weights = Path(f"encoder/saved_models/{saved_model}.pt")
+vocoder_weights = Path(f"vocoder/saved_models/pretrained/pretrained.pt")
+syn_dir = Path(f"synthesizer/saved_models/pretrained/pretrained.pt")
+
 encoder.load_model(encoder_weights)
 synthesizer = Synthesizer(syn_dir)
 vocoder.load_model(vocoder_weights)
@@ -30,13 +34,13 @@ if not os.path.isdir("static"):
     os.mkdir("static")
 
 print("[*] Loading reference audios from CREMAD")
-meta_data_file_path = os.path.join("data", "CREMAD", "VideoDemographics.csv")
-audio_dir_path = os.path.join("data", "CREMAD", "AudioWAV")
+meta_data_file_path = os.path.join("..", "DATASETS", "CREMAD", "VideoDemographics.csv")
+audio_dir_path = os.path.join("..", "DATASETS", "CREMAD", "AudioWAV")
 
 # Getting the search dict ready
-print("[*] Generating Search Dictionary for CREMAD")
-CREMAD_search_dict = generate_CREMAD_search_dict(
-    meta_data_file_path, audio_dir_path)
+# print("[*] Generating Search Dictionary for CREMAD")
+# CREMAD_search_dict = generate_CREMAD_search_dict(
+#     meta_data_file_path, audio_dir_path)
 
 
 @app.route("/api/generate-audio", methods=["POST"])
@@ -72,12 +76,21 @@ def create_audio():
     try:
 
         # Generate Audio Code goes here
-        reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
-        print(f"[REFERENCE AUDIO] {reference_audio_path}")
+        # reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
 
         # ref_male_audio_path = os.path.join("data", "ref_audios", "2002-139469-0019.flac")
         # ref_female_audio_path = os.path.join("data", "ref_audios", "2007-149877-0001.flac")
         # reference_audio_path = ref_male_audio_path if (int(sex)) else ref_female_audio_path
+
+        gender_word = "Male" if (int(sex)) else "Female"
+        reference_audio_dir_path = os.path.join("data", "ref_audio", ageGroup, gender_word)
+        
+        ref_audio_name = random.sample(os.listdir(reference_audio_dir_path), 1)[0]
+        
+        reference_audio_path = os.path.join(reference_audio_dir_path, ref_audio_name)
+
+        print(f"User audio settings : {ageGroup}, {gender_word}")
+        print(f"[REFERENCE AUDIO] {reference_audio_path}")
 
         print("[*] Taking Ref Audio ", reference_audio_path)
         generated_audio_path = generate_audio(
