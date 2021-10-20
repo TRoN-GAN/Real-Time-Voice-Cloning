@@ -35,7 +35,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print_args(args, parser)
     modified_hp = hparams.parse(args.hparams)
-    
+
     if not hasattr(args, "in_dir"):
         args.in_dir = os.path.join(args.datasets_root, "SV2TTS", "synthesizer")
     if not hasattr(args, "out_dir"):

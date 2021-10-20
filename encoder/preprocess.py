@@ -6,6 +6,7 @@ from encoder import audio
 from pathlib import Path
 from tqdm import tqdm
 import numpy as np
+import os
 
 
 class DatasetLog:
@@ -84,6 +85,7 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
         else:
             existing_fnames = {}
         
+        
         # Gather all audio files for that speaker recursively
         sources_file = sources_fpath.open("a" if skip_existing else "w")
         for in_fpath in speaker_dir.glob("**/*.%s" % extension):
@@ -109,7 +111,6 @@ def _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir,
             sources_file.write("%s,%s\n" % (out_fname, in_fpath))
         
         sources_file.close()
-    
     # Process the utterances for each speaker
     with ThreadPool(8) as pool:
         list(tqdm(pool.imap(preprocess_speaker, speaker_dirs), dataset_name, len(speaker_dirs),
@@ -172,4 +173,18 @@ def preprocess_voxceleb2(datasets_root: Path, out_dir: Path, skip_existing=False
     # Preprocess all speakers
     speaker_dirs = list(dataset_root.joinpath("dev", "aac").glob("*"))
     _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir, "m4a",
+                             skip_existing, logger)
+
+
+def preprocess_cremad(datasets_root: Path, out_dir: Path, skip_existing=False):
+    dataset_name = "CREMAD"
+    dataset_root, logger = _init_preprocess_dataset(dataset_name, datasets_root, out_dir)
+    if not dataset_root:
+        return
+
+    with dataset_root.joinpath("VideoDemographics.csv").open("r") as metafile:
+        metadata = [line.split(",") for line in metafile][1:]
+
+    speaker_dirs = list(dataset_root.joinpath("AudioWAV").glob("*"))
+    _preprocess_speaker_dirs(speaker_dirs, dataset_name, datasets_root, out_dir, "wav",
                              skip_existing, logger)

@@ -13,7 +13,7 @@ import platform
 def run_synthesis(in_dir, out_dir, model_dir, hparams):
     # This generates ground truth-aligned mels for vocoder training
     synth_dir = Path(out_dir).joinpath("mels_gta")
-    synth_dir.mkdir(exist_ok=True)
+    os.mkdir(synth_dir)
     print(hparams_debug_string())
 
     # Check for GPU
