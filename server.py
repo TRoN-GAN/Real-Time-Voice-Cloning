@@ -7,20 +7,22 @@ from encoder import inference as encoder
 from vocoder import inference as vocoder
 from synthesizer.inference import Synthesizer
 
-
-from generate_audio import generate_audio
+from reference_audio_selector import get_reference_audio_path
+from generate_audio import generate_audio, generate_audiobook_file
 from cremadUtils import generate_CREMAD_search_dict
 
 app = Flask(__name__, static_folder='static')
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+# GLOBAL VARIABLES
+REF_AUDIO_TYPE = 'gender'
 
 # Loading the Models and keeping them ready for use
 # Loading the pretrained model
 print("[*] Loading pretrained Models")
 
-saved_model = "1"
+saved_model = "pretrained"
 encoder_weights = Path(f"encoder/saved_models/{saved_model}.pt")
 vocoder_weights = Path(f"vocoder/saved_models/pretrained/pretrained.pt")
 syn_dir = Path(f"synthesizer/saved_models/pretrained/pretrained.pt")
@@ -54,45 +56,25 @@ def create_audio():
     text_prompt = request_content['prompt']
     sex = request_content['sex']
     ageGroup = request_content['age']
-    # ethnicity = request_content['ethnicity']
-    # race = request_content['race']
-    # language = request_content['language']
-    # emotion = request_content['emotion']
-    # emotion_level = request_content['emotion_level']
+
 
     print("--------------------------------------------------------------------->")
     print("Audio ID : ", audioId)
     print("Prompt : ", text_prompt)
     print("Sex : ", sex)
     print("Age Group : ", ageGroup)
-    # print("Ethnicity : ", ethnicity)
-    # print("race : ", race)
-    # print("language : ", language)
-    # print("emotion : ", emotion)
-    # print("emotion_level : ",emotion_level)
-    print("--------------------------------------------------------------------->")
+
 
     # Generation of Audio
     try:
 
+        # # CREMAD BASED ONLY
         # Generate Audio Code goes here
         # reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
+     
+        # Getting Reference Audio Path
+        reference_audio_path = get_reference_audio_path(REF_AUDIO_TYPE, sex, ageGroup)
 
-        # ref_male_audio_path = os.path.join("data", "ref_audios", "2002-139469-0019.flac")
-        # ref_female_audio_path = os.path.join("data", "ref_audios", "2007-149877-0001.flac")
-        # reference_audio_path = ref_male_audio_path if (int(sex)) else ref_female_audio_path
-
-        gender_word = "Male" if (int(sex)) else "Female"
-        reference_audio_dir_path = os.path.join("data", "ref_audio", ageGroup, gender_word)
-        
-        ref_audio_name = random.sample(os.listdir(reference_audio_dir_path), 1)[0]
-        
-        reference_audio_path = os.path.join(reference_audio_dir_path, ref_audio_name)
-
-        print(f"User audio settings : {ageGroup}, {gender_word}")
-        print(f"[REFERENCE AUDIO] {reference_audio_path}")
-
-        print("[*] Taking Ref Audio ", reference_audio_path)
         generated_audio_path = generate_audio(
             audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
 
@@ -114,6 +96,57 @@ def create_audio():
         }
 
     return jsonify(return_val)
+
+
+
+@app.route("/api/generate-audiobook", methods=["POST"])
+@cross_origin()
+def generate_audiobook():
+
+    # Retrieving the data from json
+    request_content = request.get_json()
+
+    audioId = request_content['audioId']
+    text_prompt = request_content['prompt']
+    sex = request_content['sex']
+    ageGroup = request_content['age']
+
+    print("--------------------------------------------------------------------->")
+    print("Audio ID : ", audioId)
+    print("Prompt : ", text_prompt)
+    print("Sex : ", sex)
+    print("Age Group : ", ageGroup)
+
+
+
+    try:
+
+        reference_audio_path = get_reference_audio_path(REF_AUDIO_TYPE, sex, ageGroup)
+
+        generated_audio_path = generate_audiobook_file(
+            audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
+
+        # Returning the generated file
+        return_val = {
+            'status': 200,
+            'statusText': "ok",
+            'prompt': text_prompt,
+            'url': generated_audio_path
+        }
+
+
+    except Exception as e:
+
+        print("Internal Server Error")
+        print("[ERROR] ", e)
+        return_val = {
+            'status': 500,
+            'statusText': "Internal Server Error",
+        }
+
+    return jsonify(return_val)
+
+    
 
 
 @app.route("/static/<path:filename>", methods=["GET"])

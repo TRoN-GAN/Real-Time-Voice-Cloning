@@ -37,3 +37,8 @@ def generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder, referenc
     sf.write(audio_file_path, generated_wav, synthesizer.sample_rate)
 
     return audio_file_path
+
+
+def generate_audiobook_file(audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path):
+
+    pass
