@@ -1,4 +1,5 @@
 import os
+import time
 import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
@@ -42,7 +43,7 @@ audio_dir_path = os.path.join("..", "DATASETS", "CREMAD", "AudioWAV")
 # Getting the search dict ready
 # print("[*] Generating Search Dictionary for CREMAD")
 # CREMAD_search_dict = generate_CREMAD_search_dict(
-#     meta_data_file_path, audio_dir_path)
+#     meta_data_file_path, audio_dir_path)methods
 
 
 @app.route("/api/generate-audio", methods=["POST"])
@@ -71,19 +72,25 @@ def create_audio():
         # # CREMAD BASED ONLY
         # Generate Audio Code goes here
         # reference_audio_path = CREMAD_search_dict[ageGroup][str(sex)][0]
-     
+        
+        # Tracking time for generation
+        start_time = time.time()
         # Getting Reference Audio Path
         reference_audio_path = get_reference_audio_path(REF_AUDIO_TYPE, sex, ageGroup)
-
         generated_audio_path = generate_audio(
             audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
+
+        # Tracking time for generation
+        end_time = time.time()
+        total_time = end_time - start_time
 
         # Returning the generated file
         return_val = {
             'status': 200,
             'statusText': "ok",
             'prompt': text_prompt,
-            'url': generated_audio_path
+            'url': generated_audio_path,
+            'generationTime': total_time
         }
 
     except Exception as e:
@@ -121,17 +128,25 @@ def generate_audiobook():
 
     try:
 
+        # Tracking time for generation
+        start_time = time.time()
+
         reference_audio_path = get_reference_audio_path(REF_AUDIO_TYPE, sex, ageGroup)
 
         generated_audio_path = generate_audiobook_file(
             audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path)
+        
+        # Tracking time for generation
+        end_time = time.time()
+        total_time = end_time - start_time
 
         # Returning the generated file
         return_val = {
             'status': 200,
             'statusText': "ok",
             'prompt': text_prompt,
-            'url': generated_audio_path
+            'url': generated_audio_path,
+            'generationTime': total_time
         }
 
 
@@ -157,3 +172,5 @@ def fetch_audio(filename):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
