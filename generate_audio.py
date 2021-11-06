@@ -10,6 +10,7 @@ import librosa
 import soundfile as sf
 import os
 import multiprocessing 
+from enhance import trim_long_silences, normalize_volume
 
 
 def generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder, reference_audio_path):
@@ -35,7 +36,12 @@ def generate_audio(audioId, text_prompt, encoder, synthesizer, vocoder, referenc
     print("[4] Saving the Audio")
     # Saving the Generated Audio file
     audio_file_path = os.path.join("static", "audio" + audioId + ".wav")
-    sf.write(audio_file_path, generated_wav, synthesizer.sample_rate)
+    
+    # enhancing the generated wav
+    norm_wav = normalize_volume(generated_wav, -30)
+    trim_wav = trim_long_silences(norm_wav)
+   
+    sf.write(audio_file_path, trim_wav, synthesizer.sample_rate)
 
     return audio_file_path
 
@@ -66,7 +72,12 @@ def generate_audiobook_file(audioId, text_prompt, encoder, synthesizer, vocoder,
             specs = synthesizer.synthesize_spectrograms([sentence], [embed])
 
         generated_wav = vocoder.infer_waveform(specs[0])
-        audiobookArray = np.concatenate((audiobookArray, generated_wav), axis=0)
+
+        # enhancing the generated wav
+        norm_wav = normalize_volume(generated_wav, -30)
+        trim_wav = trim_long_silences(norm_wav)
+        
+        audiobookArray = np.concatenate((audiobookArray, trim_wav), axis=0)
     
     # Padding
     # audiobookArray = np.pad(
@@ -75,6 +86,7 @@ def generate_audiobook_file(audioId, text_prompt, encoder, synthesizer, vocoder,
     print("\n [5] Saving generated audiobook")
     # Saving the Generated Audio file
     audio_file_path = os.path.join("static", "audio" + audioId + ".wav")
+
     sf.write(audio_file_path, audiobookArray, synthesizer.sample_rate)
 
     return audio_file_path
