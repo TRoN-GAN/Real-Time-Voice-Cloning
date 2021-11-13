@@ -80,8 +80,8 @@ def generate_audiobook_file(audioId, text_prompt, encoder, synthesizer, vocoder,
         audiobookArray = np.concatenate((audiobookArray, trim_wav), axis=0)
     
     # Padding
-    # audiobookArray = np.pad(
-    #     audiobookArray, (0, synthesizer.sample_rate), mode="constant")
+    audiobookArray = np.pad(
+        audiobookArray, (0, synthesizer.sample_rate), mode="constant")
 
     print("\n [5] Saving generated audiobook")
     # Saving the Generated Audio file

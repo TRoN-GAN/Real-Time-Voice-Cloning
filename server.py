@@ -39,6 +39,9 @@ if not os.path.isdir("static"):
 if not os.path.isdir("static/uploaded"):
     os.mkdir("static/uploaded")
 
+if not os.path.isdir("static/saved"):
+    os.mkdir("static/saved")
+
 print("[*] Loading reference audios from CREMAD")
 meta_data_file_path = os.path.join(
     "..", "DATASETS", "CREMAD", "VideoDemographics.csv")
@@ -230,6 +233,11 @@ def upload_file(filename):
 @cross_origin()
 def fetch_audio(filename):
     return send_from_directory("static", filename)
+
+@app.route("/saved/<path:filename>", methods=["GET"])
+@cross_origin()
+def fetch_saved_audio(filename):
+    return send_from_directory("saved", filename)
 
 
 if __name__ == "__main__":

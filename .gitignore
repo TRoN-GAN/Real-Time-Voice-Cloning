@@ -13,7 +13,6 @@
 *.bbl
 *.bcf
 *.toc
-*.wav
 *.sh
 **.zip
 encoder/saved_models/*
